@@ -32,4 +32,3 @@ def k_subsets(n: int, p: int, k: int) -> np.ndarray:
 
 COM_5_7 = k_subsets(7, 21, 5)
 
-# print(k_subsets(7, 100000, 0))
