@@ -3,36 +3,6 @@ from typing import List, Dict
 import numpy as np
 from combinatorics import k_subsets as kSUB, COM_5_7
 
-class Card():
-    """
-    Class for storing data about every contour detected
-    """
-    def __init__(self, num : int):
-        self.id : int = num-1
-        self.suit : Suit = Suit(self.id//13)
-        self.rank : Rank = Rank(self.id%13)
-
-    def __repr__(self) -> str:
-        return f'{self.rank.name} of {self.suit.name}'
-    
-class Player():
-    def __init__(self):
-        self.cards : List[Card] = []
-        self.name : str
-        self.posibillities : int = 0
-        self.wins : int = 0
-        self.draws : int = 0
-        self.numberOfSets : Dict = {comb.name:0 for comb in Combination}
-    
-    def __repr__(self) -> str:
-        return f'\nPlayer {self.name} \nHand: {self.cards}\n wins|draws|total : {self.wins}|{self.draws}|{self.posibillities} \nsets: {self.numberOfSets}\n'
-    
-    def clearStats(self) -> None:
-        self.posibillities = 0
-        self.wins = 0
-        self.draws = 0
-        self.numberOfSets : Dict = {comb.name:0 for comb in Combination}
-
 class Suit(Enum):
     HEARTS = 0
     DIAMONDS = 1
@@ -66,12 +36,54 @@ class Combination(Enum):
     HIGH_CARD = 1
     WRONG = 0
 
+
+
+
+class Card():
+    """
+    Class for storing data about every contour detected
+    """
+    def __init__(self, num : int):
+        self.id : int = num-1
+        self.suit : Suit = Suit(self.id//13)
+        self.rank : Rank = Rank(self.id%13)
+
+    def __repr__(self) -> str:
+        return f'{self.rank.name} of {self.suit.name}'
+
+
+class Player():
+    def __init__(self, name: str):
+        self.cards : List[Card] = []
+        self.name : str = name
+        self.posibillities : int = 0
+        self.wins : int = 0
+        self.draws : int = 0
+        self.numberOfSets : Dict = {comb : 0 for comb in Combination}
+
+
+    def __repr__(self) -> str:
+        return f'\nPlayer {self.name} \nHand: {self.cards}\n wins|draws|total : {self.wins}|{self.draws}|{self.posibillities} \nsets: {self.numberOfSets}\n'
+
+
+    def __str__(self) -> str:
+        return repr(self)
+
+
+    def clearStats(self) -> None:
+        self.posibillities = 0
+        self.wins = 0
+        self.draws = 0
+        self.numberOfSets : Dict = {comb : 0 for comb in Combination}
+
+
+
 def analizeRound(players: List[Player], table: List[Card], deck: List[Card]) -> None:
     '''
     Funkcja sprawdza który gracz ile razy wygra przy dostępnych możliwych brakujących kartach
     '''
     subsetSize = 5 - len(table)
-    subsets = kSUB(n= len(deck), p= 10000000000, k=subsetSize) # p= 10000000000 tak żeby wygenerowało wszystkie
+    subsets = kSUB(n = len(deck), p = -1, k = subsetSize)
 
     if(subsetSize == 0):
         for p in players:
@@ -80,7 +92,7 @@ def analizeRound(players: List[Player], table: List[Card], deck: List[Card]) -> 
         for i in range(len(players)) :
             outComb = analizeSet(players[i].cards + table)
             subsetOutcomes.append(outComb)
-            players[i].numberOfSets[outComb.name] += 1
+            players[i].numberOfSets[outComb] += 1
 
         winningComb = max(subsetOutcomes, key=lambda item:item.value)
         # print(subsetOutcomes)
@@ -106,7 +118,7 @@ def analizeRound(players: List[Player], table: List[Card], deck: List[Card]) -> 
         for i in range(len(players)) :
             outComb = analizeSet(players[i].cards + table + ssCards)
             subsetOutcomes.append(outComb)
-            players[i].numberOfSets[outComb.name] += 1
+            players[i].numberOfSets[outComb] += 1
 
         winningComb = max(subsetOutcomes, key=lambda item:item.value)
         # print(subsetOutcomes)
@@ -120,6 +132,7 @@ def analizeRound(players: List[Player], table: List[Card], deck: List[Card]) -> 
         if len(indices) == 1:
             players[indices[0]].wins = players[indices[0]].wins + 1
 
+
 def analizeSet(cards: List[Card]) -> Combination:
     '''
     Funkcja znajduje najlepszy 5 kartowy układ w 7 kartowym zbiorze
@@ -132,6 +145,8 @@ def analizeSet(cards: List[Card]) -> Combination:
         bestComb = max([comb, bestComb])
     return Combination(bestComb)
 
+
+
 def analizeSubset(cards: List[Card]) -> Combination:
     '''
     Funkcja rozpoznaje układ pokerowy w podanym zbiorze 5 kart
@@ -141,6 +156,7 @@ def analizeSubset(cards: List[Card]) -> Combination:
     for comb in combs:
         detCombs.append(comb(cards))
     return max(detCombs, key=lambda item:item.value)
+
 
 def isStraightOrFlush(cards: List[Card])-> Combination:
         '''
@@ -157,6 +173,7 @@ def isStraightOrFlush(cards: List[Card])-> Combination:
             return Combination.STRAIGHT
         
         return Combination.HIGH_CARD
+
 
 def sameRankCombinations(cards: List[Card]) -> Combination:
         '''
@@ -191,6 +208,7 @@ def sameRankCombinations(cards: List[Card]) -> Combination:
             return Combination.ONE_PAIR
         
         return Combination.HIGH_CARD
+
 
 def summary(players: List[Player], table: List[Card], burned : List[Card]) -> str:
     text = f"""
