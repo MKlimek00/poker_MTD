@@ -292,8 +292,8 @@ def display_configuration(players: List[Player], table_cards: List[Card], burned
 
     lines_merged = [*table_lines, '', *burned_lines]
 
-    max_line_width = max([len(line) for line in lines_merged])
-    lines_padded = [line.center(max_line_width + line.count('\033')*4) for line in lines_merged]
+    max_line_width = max([len(line) - int(line.count('\033')*4.5) for line in lines_merged])
+    lines_padded = [line.center(max_line_width + int(line.count('\033')*4)) for line in lines_merged]
 
     print('┌' + '─'*max_line_width + '┐')
 
