@@ -6,6 +6,8 @@ from math import ceil
 import copy
 from random import shuffle
 
+import matplotlib.pyplot as plt
+
 from poker import Card, Player, Suit, Rank, Combination
 from typing import List, Tuple, Final, Generator
 
@@ -265,6 +267,42 @@ def display_players_with_table(players: List[Player], table_cards: List[Card]) -
     return padded_lines
 
 
+def _show_win_plots(players: List[Player]) -> None:
+    """
+    Wyświetla wykresy kołowe z p. wygranych, remisów i przegranych
+    """
+    cols = 4
+    rows = ceil(len(players) / cols)
+
+    for i in range(rows):
+        for j in range(cols):
+            plot_idx = i*cols + j
+            player = players[plot_idx]
+
+            win_proba = player.wins / player.posibillities
+            draw_proba = player.draws / player.posibillities
+            loss_proba = 1 - (win_proba + draw_proba)
+
+            probas = [win_proba, draw_proba, loss_proba]
+            labels = ['Wygrywa', 'Remis', 'Przegrywa']
+            colors = ['green', 'gray', 'red']
+
+            labels = list(map(lambda v: v[1], filter(lambda v: probas[v[0]] > 0., enumerate(labels))))
+            colors = list(map(lambda v: v[1], filter(lambda v: probas[v[0]] > 0., enumerate(colors))))
+            probas = list(filter(lambda v: v > 0., probas))
+
+            plt.subplot(rows, cols, plot_idx + 1)
+            plt.pie(
+                probas,
+                labels=labels,
+                colors=colors,
+                labeldistance=0.4
+            )
+            plt.title(player.name)
+
+    plt.show()
+
+
 def _print_winner(players: List[Player]) -> None:
     """
     Wyświetla zwycięzcę lub remis
@@ -282,7 +320,11 @@ def _print_winner(players: List[Player]) -> None:
 
 
 
-def display_configuration(players: List[Player], table_cards: List[Card], burned_cards: List[Card],is_last_round: bool = False) -> None:
+def display_configuration(
+    players: List[Player],
+    table_cards: List[Card],
+    burned_cards: List[Card],
+    is_last_round: bool = False) -> None:
     """
     Wyświetlenie układu gry
     """
@@ -306,4 +348,5 @@ def display_configuration(players: List[Player], table_cards: List[Card], burned
     if is_last_round:
         _print_winner(players)
     else:
+        _show_win_plots(players)
         input('Wciśnij <Enter> aby przejść do kolejnej rundy...')
