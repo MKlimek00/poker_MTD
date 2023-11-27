@@ -277,6 +277,9 @@ def _show_win_plots(players: List[Player]) -> None:
     for i in range(rows):
         for j in range(cols):
             plot_idx = i*cols + j
+            if plot_idx >= len(players):
+                break
+            
             player = players[plot_idx]
 
             win_proba = player.wins / player.posibillities
