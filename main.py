@@ -1,10 +1,20 @@
 import random
 import poker
 from typing import List
+import click
 
-def main():
+from display import display_configuration, enable_ansi, generate_unique_names
+
+
+@click.command()
+@click.argument('n_players', type=int, default=4)
+def main(n_players: int):
+    enable_ansi()
+
     N = 52
-    numberOfPlayers = 3 # liczba graczy, max = 22
+    if n_players > 22 or n_players < 2:
+        raise ValueError(f'Invalid number of players: {n_players}. Must be at least 2 and at most 22')
+
 
     deck = [poker.Card(i) for i in range(1,N+1)] # talia -> pełna lista 52 kart
     table = [] # karty leżące na stole
@@ -12,14 +22,13 @@ def main():
 
     #rozdanie kart graczom
     players: List[poker.Player] = []
-    id = 1
-    for p in range(numberOfPlayers):
-        p = poker.Player()
-        p.name = str(id)
-        id +=1
+    for player_id, name in enumerate(generate_unique_names()):
+        p = poker.Player(name)
         p.cards.append(deck.pop(random.randint(0, len(deck)-1)))
         p.cards.append(deck.pop(random.randint(0, len(deck)-1)))
         players.append(p)
+        if player_id == n_players - 1:
+            break
 
     # odrzucenie następnej karty
     burned.append(deck.pop(random.randint(0, len(deck)-1)))
@@ -29,7 +38,7 @@ def main():
         table.append(deck.pop(random.randint(0, len(deck)-1)))
 
     poker.analizeRound(players, table, deck)
-    print(poker.summary(players, table, burned))
+    display_configuration(players, table, burned)
     for p in players:
         p.clearStats()
 
@@ -41,7 +50,8 @@ def main():
 
     #analiza wygranych
     poker.analizeRound(players, table, deck)
-    print(poker.summary(players, table, burned))
+    # print(poker.summary(players, table, burned))
+    display_configuration(players, table, burned)
     for p in players:
         p.clearStats()
 
@@ -53,7 +63,8 @@ def main():
 
     #analiza wygranych
     poker.analizeRound(players, table, deck)
-    print(poker.summary(players, table, burned))
+    display_configuration(players, table, burned, is_last_round=True)
 
 
-main()
+if __name__ == '__main__':
+    main()
