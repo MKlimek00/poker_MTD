@@ -34,7 +34,6 @@ class Combination(Enum):
     TWO_PAIRS = 3 
     ONE_PAIR = 2 
     HIGH_CARD = 1
-    WRONG = 0
 
 
 

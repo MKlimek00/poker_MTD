@@ -273,7 +273,7 @@ def _show_win_plots(players: List[Player]) -> None:
     """
     cols = 4
     rows = ceil(len(players) / cols)
-
+    
     for i in range(rows):
         for j in range(cols):
             plot_idx = i*cols + j
@@ -304,6 +304,36 @@ def _show_win_plots(players: List[Player]) -> None:
             plt.title(player.name)
 
     plt.show()
+
+def _show_win_bar_plots(players: List[Player]) -> None:
+    """
+    Wyświetla wykresy słupkowe utrzymanych układów przez poszczególnych graczy
+    """
+    plt.figure()
+    cols = 4
+    rows = ceil(len(players) / cols)
+    
+    X = np.array([_disp_combination(comb) for comb in Combination])
+
+    for i in range(rows):
+        for j in range(cols):
+            plot_idx = i*cols + j
+            if plot_idx >= len(players):
+                break
+
+            player = players[plot_idx]
+
+            Y = np.array([player.numberOfSets[comb]/player.posibillities *100. for comb in Combination])
+            plt.subplot(rows, cols, plot_idx + 1)
+            plt.bar(X,Y)
+            plt.xticks(rotation=30, ha='right')
+            plt.title(player.name)
+            plt.ylabel("Szanse na układ [%]")
+            plt.ylim(0, 100)
+    plt.show()
+
+
+
 
 
 def _print_winner(players: List[Player]) -> None:
@@ -352,4 +382,5 @@ def display_configuration(
         _print_winner(players)
     else:
         _show_win_plots(players)
+        _show_win_bar_plots(players)
         input('Wciśnij <Enter> aby przejść do kolejnej rundy...')
